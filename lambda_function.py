@@ -6,8 +6,8 @@ import stat
 import logging
 import json
 import numpy as np
-from keras.preprocessing.text import one_hot
-import tensorflow as tf
+from one_hot import one_hot
+
 
 logging.basicConfig(level=logging.DEBUG)
 print "logging"
@@ -46,8 +46,20 @@ for d, _, files in os.walk('lib'):
 path_to_model = "./"
 vocabulary_lenght = 9013
 
-sess = tf.Session()
-tf.saved_model.loader.load(sess, [tf.saved_model.tag_constants.SERVING], path_to_model)
+
+import mxnet as mx
+
+model_dir = "./"
+vocabulary_lenght = 9013
+
+
+symbol = mx.sym.load('%s/model.json' % model_dir)
+outputs = mx.symbol.softmax(data=symbol, name='softmax_label')
+inputs = mx.sym.var('data')
+param_dict = mx.gluon.ParameterDict('model_')
+net = mx.gluon.SymbolBlock(outputs, inputs, param_dict)
+net.load_params('%s/model.params' % model_dir, ctx=mx.cpu())
+
 
 def handler(event, context):
     print event
@@ -63,12 +75,12 @@ def handler(event, context):
     one_hot_test_messages = one_hot_encode(test_messages, vocabulary_lenght)
     encoded_test_messages = vectorize_sequences(one_hot_test_messages, vocabulary_lenght)
 
+    encoded_test_messages = mx.nd.array(encoded_test_messages)
+    output = net(encoded_test_messages)
+    predictions = np.argmax(output, axis=1)
 
-    sigmoid_tensor = sess.graph.get_tensor_by_name('output-layer/Sigmoid:0')
-    predictions = sess.run(sigmoid_tensor, {'Placeholder_1:0': encoded_test_messages})
+    print(predictions[0])
 
-    print(predictions[0][0])
-
-    result = predictions[0][0]
+    result = predictions[0]
 
     return response(200, result)
