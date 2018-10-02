@@ -11,4 +11,3 @@ Resources:
       MemorySize: 128
       Timeout: 15
       CodeUri: .debug/
-\
