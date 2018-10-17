@@ -11,3 +11,9 @@ Resources:
       MemorySize: 128
       Timeout: 15
       CodeUri: .debug/
+      Events:
+        GetInference:
+          Type: Api
+          Properties:
+            Path: /
+            Method: post
