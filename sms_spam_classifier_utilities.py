@@ -1,15 +1,26 @@
 import string
 import sys
-#import warnings
-from hashlib import md5
-
 import numpy as np
+
+from hashlib import md5
 
 if sys.version_info < (3,):
     maketrans = string.maketrans
 else:
     maketrans = str.maketrans
+    
+def vectorize_sequences(sequences, vocabulary_length):
+    results = np.zeros((len(sequences), vocabulary_length))
+    for i, sequence in enumerate(sequences):
+       results[i, sequence] = 1. 
+    return results
 
+def one_hot_encode(messages, vocabulary_length):
+    data = []
+    for msg in messages:
+        temp = one_hot(msg, vocabulary_length)
+        data.append(temp)
+    return data
 
 def text_to_word_sequence(text,
                           filters='!"#$%&()*+,-./:;<=>?@[\\]^_`{|}~\t\n',
