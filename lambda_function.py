@@ -14,9 +14,9 @@ def response(status_code, response_body):
                 'statusCode': status_code,
                 'body': str(response_body),
                 'headers': {
-			'Content-Type': 'application/json',
-			"Access-Control-Allow-Origin" : "*", // Required for CORS support to work
-        		"Access-Control-Allow-Credentials" : true // Required for cookies, authorization headers with HTTPS
+                    'Content-Type': 'application/json',
+                    'Access-Control-Allow-Origin' : "*",
+                    'Access-Control-Allow-Credentials' : true 
                 },
             }
 
@@ -36,20 +36,30 @@ net = mx.gluon.nn.SymbolBlock(
 net.load_params('./model.params', ctx=mx.cpu())
 
 def handler(event, context):
+
     sms = event['body']
-    test_messages = [sms.encode('ascii','ignore')]
 
-    one_hot_test_messages = one_hot_encode(test_messages, vocabulary_lenght)
-    encoded_test_messages = vectorize_sequences(one_hot_test_messages, vocabulary_lenght)
 
-    encoded_test_messages = mx.nd.array(encoded_test_messages)
-    output = net(encoded_test_messages)
-    sigmoid_output = output.sigmoid()
-    prediction = mx.nd.abs(mx.nd.ceil(sigmoid_output - 0.5))
-    
-    output_obj = {}
-    output_obj['predicted_label'] = np.array2string(prediction.asnumpy()[0][0])
-    output_obj['predicted_probability'] = np.array2string(sigmoid_output.asnumpy()[0][0])
+    if 'httpMethod' in event:
+        if event['httpMethod'] == 'OPTIONS':
+            return response(200, '')
 
-    return response(200, output_obj)
+        elif event['httpMethod'] == 'POST':
+            test_messages = [sms.encode('ascii','ignore')]
 
+            one_hot_test_messages = one_hot_encode(test_messages, vocabulary_lenght)
+            encoded_test_messages = vectorize_sequences(one_hot_test_messages, vocabulary_lenght)
+
+            encoded_test_messages = mx.nd.array(encoded_test_messages)
+            output = net(encoded_test_messages)
+            sigmoid_output = output.sigmoid()
+            prediction = mx.nd.abs(mx.nd.ceil(sigmoid_output - 0.5))
+            
+            output_obj = {}
+            output_obj['predicted_label'] = np.array2string(prediction.asnumpy()[0][0])
+            output_obj['predicted_probability'] = np.array2string(sigmoid_output.asnumpy()[0][0])
+
+            return response(200, output_obj)
+
+        else:
+            return response(405, 'null')
