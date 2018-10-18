@@ -16,5 +16,5 @@ Resources:
           Type: Api
           Properties:
             Path: /
-            Method: post
+            Method: any
 	    cors: true
