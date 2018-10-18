@@ -2,7 +2,6 @@ import ctypes
 import os
 import logging
 import numpy as np
-import mxnet as mx
 from sms_spam_classifier_utilities import one_hot_encode
 from sms_spam_classifier_utilities import vectorize_sequences
 
@@ -27,6 +26,8 @@ for d, _, files in os.walk('lib'):
         print('loading %s...' % f)
         ctypes.cdll.LoadLibrary(os.path.join(d, f))
 
+import mxnet as mx
+
 vocabulary_lenght = 9013
 
 # Load the Gluon model.
@@ -34,6 +35,7 @@ net = mx.gluon.nn.SymbolBlock(
         outputs=mx.sym.load('./model.json'),
         inputs=mx.sym.var('data'))
 net.load_params('./model.params', ctx=mx.cpu())
+
 
 def handler(event, context):
 

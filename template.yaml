@@ -17,3 +17,8 @@ Resources:
           Properties:
             Path: /
             Method: any
+        OptionsInference:
+          Type: Api
+          Properties:
+            Path: /
+            Method: OPTIONS
