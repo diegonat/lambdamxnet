@@ -14,7 +14,9 @@ def response(status_code, response_body):
                 'statusCode': status_code,
                 'body': str(response_body),
                 'headers': {
-                    'Content-Type': 'application/json',
+			'Content-Type': 'application/json',
+			"Access-Control-Allow-Origin" : "*", // Required for CORS support to work
+        		"Access-Control-Allow-Credentials" : true // Required for cookies, authorization headers with HTTPS
                 },
             }
 
