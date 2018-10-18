@@ -8,32 +8,34 @@ from sms_spam_classifier_utilities import vectorize_sequences
 
 logging.basicConfig(level=logging.DEBUG)
 print "logging"
-
 def response(status_code, response_body):
     return {
                 'statusCode': status_code,
                 'body': str(response_body),
                 'headers': {
                     'Content-Type': 'application/json',
-                    'Access-Control-Allow-Origin' : "*",
-                    'Access-Control-Allow-Credentials' : true 
+                    'Access-Control-Allow-Origin' : '*',
+                    'Access-Control-Allow-Credentials' : 'true'
                 },
             }
 
-for d, _, files in os.walk('lib'):
-    for f in files:
-        if f.endswith('.a') or f.endswith('.settings'):
-            continue
-        print('loading %s...' % f)
-        ctypes.cdll.LoadLibrary(os.path.join(d, f))
-
-vocabulary_lenght = 9013
-
-# Load the Gluon model.
-net = mx.gluon.nn.SymbolBlock(
-        outputs=mx.sym.load('./model.json'),
-        inputs=mx.sym.var('data'))
-net.load_params('./model.params', ctx=mx.cpu())
+def load_mxnet():
+    
+    for d, _, files in os.walk('lib'):
+        for f in files:
+            if f.endswith('.a') or f.endswith('.settings'):
+                continue
+            print('loading %s...' % f)
+            ctypes.cdll.LoadLibrary(os.path.join(d, f))
+    
+    vocabulary_lenght = 9013
+    
+    # Load the Gluon model.
+    net = mx.gluon.nn.SymbolBlock(
+            outputs=mx.sym.load('./model.json'),
+            inputs=mx.sym.var('data'))
+    net.load_params('./model.params', ctx=mx.cpu())
+    return vocabulary_lenght, net
 
 def handler(event, context):
 
@@ -46,6 +48,8 @@ def handler(event, context):
 
         elif event['httpMethod'] == 'POST':
             test_messages = [sms.encode('ascii','ignore')]
+
+            vocabulary_lenght, net = load_mxnet()
 
             one_hot_test_messages = one_hot_encode(test_messages, vocabulary_lenght)
             encoded_test_messages = vectorize_sequences(one_hot_test_messages, vocabulary_lenght)
