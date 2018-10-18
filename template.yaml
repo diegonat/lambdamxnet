@@ -17,4 +17,3 @@ Resources:
           Properties:
             Path: /
             Method: any
-	    cors: true
