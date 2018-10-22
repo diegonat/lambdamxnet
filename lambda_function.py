@@ -20,12 +20,16 @@ def response(status_code, response_body):
                 },
             }
 
-for d, _, files in os.walk('lib'):
-    for f in files:
-        if f.endswith('.a') or f.endswith('.settings'):
-            continue
-        print('loading %s...' % f)
-        ctypes.cdll.LoadLibrary(os.path.join(d, f))
+ctypes.cdll.LoadLibrary('lib/libgfortran.so.3')
+ctypes.cdll.LoadLibrary('lib/libgomp.so.1')
+ctypes.cdll.LoadLibrary('lib/libatlas.so.3')
+ctypes.cdll.LoadLibrary('lib/libcblas.so.3')
+ctypes.cdll.LoadLibrary('lib/libclapack.so.3')
+ctypes.cdll.LoadLibrary('lib/libf77blas.so.3')
+ctypes.cdll.LoadLibrary('lib/liblapack.so.3')
+ctypes.cdll.LoadLibrary('lib/libptcblas.so.3')
+ctypes.cdll.LoadLibrary('lib/libptf77blas.so.3')
+ctypes.cdll.LoadLibrary('lib/libopenblas.so.0')
 
 import mxnet as mx
 
